@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist FEVER Oficial</title>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 15px; background: #f4f4f4; color: #333; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; background: #000; color: #fff; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px; border-bottom: 4px solid #00ffcc; }
+        .header h1 { margin: 0; color: #00ffcc; letter-spacing: 2px; font-size: 28px; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .check-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+        .check-table th, .check-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .photo-item { background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #ddd; }
+        .preview-img { width: 100%; height: auto; max-height: 250px; object-fit: contain; display: none; margin-top: 10px; border: 2px solid #000; border-radius: 4px; }
+        canvas#signature-pad { border: 2px solid #000; width: 100%; height: 200px; background: #fff; border-radius: 4px; cursor: crosshair; touch-action: none; }
+        button#btn { width: 100%; padding: 18px; background: #000; color: #00ffcc; border: none; font-weight: bold; font-size: 18px; cursor: pointer; border-radius: 4px; margin-top: 20px; }
+        
+        /* STATUS GPS */
+        #status-gps { padding: 12px; margin: 15px 0; border-radius: 6px; text-align: center; font-weight: bold; font-size: 14px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        #status-gps.erro { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        #status-gps.ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: #00ffcc; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00ffcc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #success-screen { display: none; text-align: center; padding: 40px 10px; }
+    </style>
+</head>
+<body>
+
+<div id="loading">
+    <div class="spinner"></div>
+    <p>GERANDO AUDITORIA DIGITAL...<br>Aguarde o envio oficial.</p>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>FEVER</h1>
+        <p style="margin:5px 0 0 0; font-size: 12px; color: #eee; letter-spacing: 1px;">O FUTURO É ELETRIZANTE</p>
+    </div>
+
+    <div id="success-screen">
+        <h1 style="font-size: 80px; color: #00ffcc; margin: 0;">✔</h1>
+        <h2>Checklist Enviado!</h2>
+        <p>O relatório PDF foi gerado e enviado com sucesso.</p>
+        <p>Nossa equipe irá validar seu Checklist.</p>
+        <button onclick="window.close()" style="margin-top:30px; padding:15px; background:#000; color:#00ffcc; width:100%; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">SAIR</button>
+    </div>
+
+    <form id="formFever">
+        <div id="status-gps">Aguardando autorização do sistema...</div>
+
+        <label>Placa do veículo *</label>
+        <input type="text" id="placa" required maxlength="8" placeholder="ABC-1234">
+
+        <label>Chassi (8 últimos dígitos) *</label>
+        <input type="text" id="chassi" maxlength="8" placeholder="RA100256" required>
+
+        <label>Modelo do Veículo *</label>
+        <select id="modeloVeiculo" required>
+            <option value="" disabled selected>Selecione o modelo</option>
+            <option value="NEXTEM FN1000 HIGH BOX">NEXTEM FN1000 HIGH BOX</option>
+            <option value="NEXTEM FN1000 MEGA BOX">NEXTEM FN1000 MEGA BOX</option>
+            <option value="RAP FR250 BOX">RAP FR250 BOX</option>
+            <option value="RAP FR150 FRIGO">RAP FR150 FRIGO</option>
+            <option value="RAP FR110 BOX">RAP FR110 BOX</option>
+        </select>
+
+        <label>KM Atual *</label>
+        <input type="number" id="km" required>
+
+        <label>Empresa (Cliente) *</label>
+        <input type="text" id="empresa" required maxlength="45">
+
+        <label>CNPJ Empresa *</label>
+        <input type="text" id="cnpj" oninput="maskCNPJ(this)" placeholder="00.000.000/0000-00" maxlength="18" required>
+
+        <label>Nome do Usuário *</label>
+        <input type="text" id="cliente" required>
+
+        <label>Telefone *</label>
+        <input type="tel" id="telefone" oninput="maskTel(this)" placeholder="(00) 00000-0000" maxlength="15" required>
+
+        <label>Data de Recebimento do veículo *</label>
+        <input type="date" id="dataRecebimento" required>
+
+        <h3>Checklist das condições</h3>
+        <table class="check-table">
+            <thead>
+                <tr><th style="text-align:left">Item</th><th>Ok</th><th>Não Ok</th><th>N/A</th></tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+
+        <label>Algum Dano constatado? *</label>
+        <select id="dano" onchange="document.getElementById('campoObs').style.display=(this.value=='Sim'?'block':'none')" required>
+            <option value="Não">Não</option>
+            <option value="Sim">Sim</option>
+        </select>
+        <div id="campoObs" style="display:none;">
+            <label>Descreva os danos:</label>
+            <textarea id="desc" rows="3"></textarea>
+        </div>
+
+        <h3>Fotos Obrigatórias</h3>
+        <div id="gridFotos"></div>
+
+        <h3>Assinatura do Cliente *</h3>
+        <canvas id="signature-pad"></canvas>
+        <button type="button" onclick="pad.clear()" style="width:100%; padding:10px; margin-top:5px; background: #eee; border: 1px solid #ccc; cursor:pointer; font-size: 12px; border-radius:4px;">Limpar Assinatura</button>
+        
+        <button type="submit" id="btn">FINALIZAR E ENVIAR CHECKLIST</button>
+    </form>
+</div>
+
+<script>
+    const fotos = {};
+    const canvas = document.getElementById('signature-pad');
+    const pad = new SignaturePad(canvas);
+    let userLoc = "Aguardando GPS...";
+    let gpsLiberado = false;
+
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        pad.clear();
+    }
+    window.onresize = resizeCanvas;
+    resizeCanvas();
+
+    // FUNÇÃO QUE DISPARA A JANELA NATIVA DO CELULAR
+    function capturarGPS() {
+        if (gpsLiberado) return; // Se já pegou, não pede de novo
+
+        const statusDiv = document.getElementById('status-gps');
+        
+        navigator.geolocation.getCurrentPosition(
+            p => { 
+                userLoc = `Latitude: ${p.coords.latitude} Longitude: ${p.coords.longitude}`; 
+                gpsLiberado = true;
+                statusDiv.innerText = "✅ LOCALIZAÇÃO OK - GPS ATIVO";
+                statusDiv.className = "ok";
+            },
+            e => { 
+                gpsLiberado = false;
+                statusDiv.className = "erro";
+                if (e.code === e.PERMISSION_DENIED) {
+                    statusDiv.innerHTML = "❌ GPS NEGADO: Clique no cadeado da barra de endereço e libere a localização.";
+                } else {
+                    statusDiv.innerText = "❌ ERRO GPS: Verifique se o sensor está ligado.";
+                }
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    }
+
+    // Tenta disparar no carregamento
+    window.addEventListener('load', capturarGPS);
+    
+    // Tenta disparar ao primeiro toque na tela (Garante que a janela abra se o browser bloquear o carregamento automático)
+    window.addEventListener('touchstart', capturarGPS, {once: true});
+    window.addEventListener('click', capturarGPS, {once: true});
+
+    function maskTel(i) {
+        let v = i.value.replace(/\D/g, "");
+        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+        v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+        i.value = v;
+    }
+
+    function maskCNPJ(i) {
+        let v = i.value.replace(/\D/g, "");
+        if (v.length > 14) v = v.slice(0, 14);
+        v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        v = v.replace(/(\d{4})(\d)/, "$1-$2");
+        i.value = v;
+    }
+
+    const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Documentação", "Chave do veiculo", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Reparo do Pneu", "Central Multimidia"];
+    itens.forEach(it => {
+        document.getElementById('corpoTabela').innerHTML += `
+            <tr>
+                <td style="text-align:left">${it}</td>
+                <td><input type="radio" name="${it}" value="Ok" required></td>
+                <td><input type="radio" name="${it}" value="Não Ok"></td>
+                <td><input type="radio" name="${it}" value="N/A"></td>
+            </tr>`;
+    });
+
+    const fLabels = ["1. Foto Frente Veículo", "2. Foto Lateral Direita", "3. Foto Traseira", "4. Foto Lateral Esquerda", "5. Foto Placa", "6. Foto Chassi", "7. Foto do Painel/KM"];
+    fLabels.forEach((l, i) => {
+        document.getElementById('gridFotos').innerHTML += `
+            <div class="photo-item">${l}
+                <input type="file" accept="image/*" onchange="compactar(this, ${i+1})" required>
+                <img id="v${i+1}" class="preview-img">
+            </div>`;
+    });
+
+    function compactar(input, id) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const cv = document.createElement('canvas');
+                const max = 800; 
+                let w = img.width, h = img.height;
+                if (w > max) { h *= max / w; w = max; }
+                cv.width = w; cv.height = h;
+                cv.getContext('2d').drawImage(img, 0, 0, w, h);
+                const b64 = cv.toDataURL('image/jpeg', 0.6);
+                fotos['foto'+id] = b64;
+                const preview = document.getElementById('v'+id);
+                preview.src = b64; preview.style.display = 'block';
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    document.getElementById("formFever").onsubmit = async (e) => {
+        e.preventDefault();
+
+        if (!gpsLiberado) {
+            alert("A LOCALIZAÇÃO É OBRIGATÓRIA! O sistema precisa da confirmação do GPS para prosseguir.");
+            capturarGPS();
+            return;
+        }
+
+        if(pad.isEmpty()) return alert("Assinatura obrigatória!");
+        
+        document.getElementById("btn").disabled = true;
+        document.getElementById("loading").style.display = "flex";
+
+        const checks = {};
+        itens.forEach(it => { 
+            const el = document.querySelector(`input[name="${it}"]:checked`);
+            checks[it] = el ? el.value : "N/A"; 
+        });
+
+        const payload = {
+            ...fotos,
+            checklistItems: checks,
+            placa: document.getElementById("placa").value,
+            chassi: document.getElementById("chassi").value,
+            modelo: document.getElementById("modeloVeiculo").value,
+            km: document.getElementById("km").value,
+            empresa: document.getElementById("empresa").value,
+            cnpj: document.getElementById("cnpj").value,
+            cliente: document.getElementById("cliente").value,
+            telefone: document.getElementById("telefone").value,
+            dataRecebimento: document.getElementById("dataRecebimento").value,
+            dano: document.getElementById("dano").value,
+            desc: document.getElementById("desc").value || "Sem observações",
+            assinatura: pad.toDataURL(),
+            localizacao: userLoc,
+            dispositivo: navigator.userAgent,
+            timestamp: new Date().toLocaleString("pt-BR")
+        };
+
+       try {
+            const scriptURL = "https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec"; 
+            
+            await fetch(scriptURL, { 
+                method: "POST", 
+                mode: "no-cors", 
+                body: JSON.stringify(payload) 
+            });
+            
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("formFever").style.display = "none";
+            document.getElementById("success-screen").style.display = "block";
+
+            setTimeout(() => { window.close(); }, 5000); 
+            
+        } catch (err) {
+            alert("Erro no envio. Verifique sua conexão.");
+            document.getElementById("btn").disabled = false;
+            document.getElementById("loading").style.display = "none";
+        }
+    };
+</script>
+</body>
+</html>
