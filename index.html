@@ -11,7 +11,6 @@
         .header { text-align: center; background: #000; color: #fff; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px; border-bottom: 4px solid #00ffcc; }
         .header h1 { margin: 0; color: #00ffcc; letter-spacing: 2px; font-size: 28px; }
         
-        /* Telas */
         #step-gps { text-align: center; padding: 40px 10px; }
         #step-form { display: none; }
         #success-screen { display: none; text-align: center; padding: 40px 10px; }
@@ -45,14 +44,14 @@
     <div class="header">
         <h1>FEVER</h1>
         <p>O FUTURO É ELETRIZANTE</p>
-         <p>Checklist veículo</p>
+        <p>Checklist veículo</p>
     </div>
 
     <div id="step-gps">
         <h2>Bem-vindo à Auditoria Digital</h2>
-        <p>Para prosseguir, precisamos registrar a localização oficial do atendimento.</p>
+        <p>Para prosseguir, precisamos registrar a localização oficial (GPS).</p>
         <button type="button" class="btn-main btn-gps" onclick="ativarGPS()">📍 CLIQUE AQUI PARA ATIVAR GPS</button>
-        <p id="msg-gps" style="margin-top:20px; color: #666; font-size: 14px;">Aguardando autorização...</p>
+        <p id="msg-gps" style="margin-top:20px; color: #666; font-size: 14px;">Aguardando sinal de satélite...</p>
     </div>
 
     <div id="step-form">
@@ -60,7 +59,7 @@
             <label>Placa do veículo *</label>
             <input type="text" id="placa" required maxlength="8" placeholder="ABC-1234">
 
-            <label>Chassi (8 últimos digitos - Caminhão está no vidro | Triciclo na coluna direção) *</label>
+            <label>Chassi (8 últimos) *</label>
             <input type="text" id="chassi" maxlength="8" required placeholder="RA100256">
 
             <label>Modelo do veículo*</label>
@@ -74,47 +73,42 @@
             </select>
 
             <label>KM Atual *</label>
-            <input type="number" id="km" required maxlength="12">
+            <input type="number" id="km" required>
 
             <label>Empresa (Cliente) *</label>
-            <input type="text" id="empresa" required maxlength="50">
+            <input type="text" id="empresa" required>
 
             <label>CNPJ Empresa *</label>
-            <input type="text" id="cnpj" oninput="maskCNPJ(this)" placeholder="00.000.000/0000-00" required maxlength="18">
+            <input type="text" id="cnpj" oninput="maskCNPJ(this)" placeholder="00.000.000/0000-00" required>
 
             <label>Nome do Usuário *</label>
-            <input type="text" id="cliente" required maxlength="30">
+            <input type="text" id="cliente" required>
 
             <label>Telefone *</label>
-            <input type="tel" id="telefone" oninput="maskTel(this)" placeholder="(00) 00000-0000" required maxlength="15">
+            <input type="tel" id="telefone" oninput="maskTel(this)" placeholder="(00) 00000-0000" required>
 
             <label>Data *</label>
             <input type="date" id="dataRecebimento" required>
 
-            <h3>Checklist de Itens</h3>
+            <h3>Checklist</h3>
             <table class="check-table">
-                <thead>
-                    <tr><th style="text-align:left">Item</th><th>Ok</th><th>Não Ok</th><th>N/A</th></tr>
-                </thead>
+                <thead><tr><th style="text-align:left">Item</th><th>Ok</th><th>Não Ok</th><th>N/A</th></tr></thead>
                 <tbody id="corpoTabela"></tbody>
             </table>
 
-            <label>Algum Dano constatado?</label>
+            <label>Dano constatado?</label>
             <select id="dano" onchange="document.getElementById('campoObs').style.display=(this.value=='Sim'?'block':'none')">
                 <option value="Não">Não</option>
                 <option value="Sim">Sim</option>
             </select>
-            <div id="campoObs" style="display:none;">
-                <textarea id="desc" rows="3" placeholder="Descreva os danos detalhadamente..."></textarea>
-            </div>
+            <div id="campoObs" style="display:none;"><textarea id="desc" rows="3"></textarea></div>
 
-            <h3>Fotos Obrigatórias</h3>
+            <h3>Fotos</h3>
             <div id="gridFotos"></div>
 
-            <h3>Assinatura Digital *</h3>
+            <h3>Assinatura *</h3>
             <canvas id="signature-pad"></canvas>
-            <button type="button" onclick="pad.clear()" style="width:100%; padding:10px; margin-top:5px;">Limpar Assinatura</button>
-            
+            <button type="button" onclick="pad.clear()" style="width:100%; padding:10px; margin-top:5px;">Limpar</button>
             <button type="submit" class="btn-main">FINALIZAR E ENVIAR</button>
         </form>
     </div>
@@ -122,87 +116,48 @@
     <div id="success-screen">
         <h1 style="font-size: 80px; color: #00ffcc; margin: 0;">✔</h1>
         <h2>Enviado com Sucesso!</h2>
-        <p>A auditoria foi registrada no banco de dados da FEVER</p>
         <button onclick="location.reload()" class="btn-main">NOVO CHECKLIST</button>
-        <button onclick="fecharJanela()" class="btn-main" id="btn-fechar">
-            FECHAR EM <span id="timer">10</span>s
-        </button>
+        <button onclick="fecharJanela()" class="btn-main" id="btn-fechar">FECHAR EM <span id="timer">10</span>s</button>
     </div>
-
-    
 </div>
 
 <script>
-function fecharJanela() {
-        // Tenta fechar a aba atual
-        window.close();
-        
-        // Se o window.close() falhar (comum no Chrome/Android), 
-        // redirecionamos para uma página limpa ou site da empresa
-        setTimeout(() => {
-            if (!window.closed) {
-                window.location.href = "about:blank"; 
-            }
-        }, 500);
-    }
-
-    function iniciarContagemRegressiva() {
-        let segundos = 10;
-        const display = document.getElementById('timer');
-        
-        const intervalo = setInterval(() => {
-            segundos--;
-            display.innerText = segundos;
-            
-            if (segundos <= 0) {
-                clearInterval(intervalo);
-                fecharJanela();
-            }
-        }, 1000);
-    }
-
-
     const fotos = {};
     let userLoc = "";
-    let signaturePadInstance = null;
     const canvas = document.getElementById('signature-pad');
     let pad;
 
-    // Função para Ativar GPS e Mudar de Página
     function ativarGPS() {
         const msg = document.getElementById('msg-gps');
-        msg.innerText = "Solicitando permissão ao sistema...";
+        msg.innerText = "Buscando localização via satélite (precisão máxima)...";
 
-        if (!navigator.geolocation) {
-            alert("Seu navegador não suporta GPS.");
-            return;
-        }
+        if (!navigator.geolocation) return alert("Seu navegador não suporta GPS.");
+
+        // CONFIGURAÇÃO DE ALTA PRECISÃO AJUSTADA
+        const options = {
+            enableHighAccuracy: true, // FORÇA O USO DE GPS (SATÉLITE)
+            timeout: 15000,           // DÁ 15 SEGUNDOS PARA O GPS FIXAR
+            maximumAge: 0             // NÃO ACEITA LOCALIZAÇÃO ANTIGA DO CACHE
+        };
 
         navigator.geolocation.getCurrentPosition(
             p => {
-                userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude}`;
-                // MUDANÇA DE PÁGINA
+                userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude} (Precisão: ${p.coords.accuracy.toFixed(1)}m)`;
                 document.getElementById('step-gps').style.display = 'none';
                 document.getElementById('step-form').style.display = 'block';
-                
-                // Iniciar assinatura após o formulário aparecer
                 initSignature();
                 window.scrollTo(0,0);
             },
             e => {
-                alert("ERRO: Para preencher o formulário, você deve permitir o acesso ao GPS nas configurações do Chrome.");
-                msg.innerText = "❌ GPS Bloqueado. Por favor, libere o acesso no cadeado da barra de endereço.";
-                msg.style.color = "red";
+                alert("ERRO DE GPS: Certifique-se de estar em local aberto e com o GPS do celular ligado.");
+                msg.innerText = "❌ Erro ao obter precisão. Tente novamente.";
             },
-            { enableHighAccuracy: true, timeout: 10000 }
+            options
         );
     }
 
-    function initSignature() {
-        pad = new SignaturePad(canvas);
-        resizeCanvas();
-    }
-
+    // --- Mantenha o restante das suas funções de assinatura, máscaras e envio ---
+    function initSignature() { pad = new SignaturePad(canvas); resizeCanvas(); }
     function resizeCanvas() {
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         canvas.width = canvas.offsetWidth * ratio;
@@ -212,25 +167,15 @@ function fecharJanela() {
     }
     window.addEventListener("resize", resizeCanvas);
 
-    // Máscaras
     function maskTel(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); v = v.replace(/(\d)(\d{4})$/, "$1-$2"); i.value = v; }
     function maskCNPJ(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/, "$1.$2"); v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); v = v.replace(/(\d{4})(\d)/, "$1-$2"); i.value = v; }
 
-    // Gerar Tabela Checklist
     const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Documentação", "Chave do veiculo", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Reparo do Pneu", "Central Multimidia"];
-    itens.forEach(it => { 
-        document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; 
-    });
+    itens.forEach(it => { document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; });
 
-    // Gerar Inputs de Fotos (FORÇANDO CÂMERA)
     const fLabels = ["Foto Frente", "Foto Lat. Direita", "Foto Traseira", "Foto Lat. Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM"];
     fLabels.forEach((l, i) => { 
-        document.getElementById('gridFotos').innerHTML += `
-            <div class="photo-item">
-                <label>${l}</label>
-                <input type="file" accept="image/*" capture="camera" onchange="compactar(this, ${i+1})" required>
-                <img id="v${i+1}" class="preview-img">
-            </div>`; 
+        document.getElementById('gridFotos').innerHTML += `<div class="photo-item"><label>${l}</label><input type="file" accept="image/*" capture="camera" onchange="compactar(this, ${i+1})" required><img id="v${i+1}" class="preview-img"></div>`; 
     });
 
     function compactar(input, id) {
@@ -254,49 +199,26 @@ function fecharJanela() {
         reader.readAsDataURL(input.files[0]);
     }
 
-    // Envio do Formulário
+    function fecharJanela() { window.close(); setTimeout(() => { if (!window.closed) window.location.href = "about:blank"; }, 500); }
+    function iniciarContagemRegressiva() {
+        let seg = 10; const d = document.getElementById('timer');
+        const i = setInterval(() => { seg--; d.innerText = seg; if(seg <= 0){ clearInterval(i); fecharJanela(); }}, 1000);
+    }
+
     document.getElementById("formFever").onsubmit = async (e) => {
         e.preventDefault();
-        if(pad.isEmpty()) return alert("A assinatura é obrigatória!");
-        
+        if(pad.isEmpty()) return alert("Assinatura obrigatória!");
         document.getElementById("loading").style.display = "flex";
-
         const checks = {};
-        itens.forEach(it => { 
-            const el = document.querySelector(`input[name="${it}"]:checked`);
-            checks[it] = el ? el.value : "N/A"; 
-        });
-
-        const payload = {
-            ...fotos,
-            checklistItems: checks,
-            placa: document.getElementById("placa").value,
-            chassi: document.getElementById("chassi").value,
-            modelo: document.getElementById("modeloVeiculo").value,
-            km: document.getElementById("km").value,
-            empresa: document.getElementById("empresa").value,
-            cnpj: document.getElementById("cnpj").value,
-            cliente: document.getElementById("cliente").value,
-            telefone: document.getElementById("telefone").value,
-            dataRecebimento: document.getElementById("dataRecebimento").value,
-            dano: document.getElementById("dano").value,
-            desc: document.getElementById("desc").value || "Sem observações",
-            assinatura: pad.toDataURL(),
-            localizacao: userLoc,
-            timestamp: new Date().toLocaleString("pt-BR")
-        };
-
+        itens.forEach(it => { const el = document.querySelector(`input[name="${it}"]:checked`); checks[it] = el ? el.value : "N/A"; });
+        const payload = { ...fotos, checklistItems: checks, placa: document.getElementById("placa").value, chassi: document.getElementById("chassi").value, modelo: document.getElementById("modeloVeiculo").value, km: document.getElementById("km").value, empresa: document.getElementById("empresa").value, cnpj: document.getElementById("cnpj").value, cliente: document.getElementById("cliente").value, telefone: document.getElementById("telefone").value, dataRecebimento: document.getElementById("dataRecebimento").value, dano: document.getElementById("dano").value, desc: document.getElementById("desc").value || "Sem obs", assinatura: pad.toDataURL(), localizacao: userLoc, timestamp: new Date().toLocaleString("pt-BR") };
         try {
-            const scriptURL = "https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec";
-            await fetch(scriptURL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            await fetch("https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             document.getElementById("loading").style.display = "none";
             document.getElementById("step-form").style.display = "none";
             document.getElementById("success-screen").style.display = "block";
-            window.scrollTo(0,0);
-        } catch (err) {
-            alert("Erro no envio. Verifique sua conexão.");
-            document.getElementById("loading").style.display = "none";
-        }
+            iniciarContagemRegressiva();
+        } catch (err) { alert("Erro no envio."); document.getElementById("loading").style.display = "none"; }
     };
 </script>
 </body>
