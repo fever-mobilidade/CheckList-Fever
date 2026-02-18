@@ -106,7 +106,7 @@
             <textarea id="desc" rows="3" placeholder="Descreva os danos..."></textarea>
         </div>
 
-        <h3>Fotos</h3>
+        <h3>Fotos (Câmera Traseira)</h3>
         <div id="gridFotos"></div>
 
         <h3>Assinatura *</h3>
@@ -137,7 +137,6 @@
     function capturarGPS() {
         const statusDiv = document.getElementById('status-gps');
         const btnManual = document.getElementById('btn-gps-manual');
-        
         statusDiv.innerText = "Solicitando acesso...";
 
         navigator.geolocation.getCurrentPosition(
@@ -152,15 +151,12 @@
                 gpsLiberado = false;
                 statusDiv.className = "erro";
                 statusDiv.innerHTML = "❌ GPS BLOQUEADO: Clique no ajuste/cadeado da barra de endereço e mude Localização para 'Permitir'.";
-                
-                // Alerta nativo para forçar a atenção do usuário
-                alert("O GPS está bloqueado no seu navegador.\n\nClique no ícone de 'ajustes' ou 'cadeado' lá no topo, ao lado do link, e mude a Localização para 'Permitir'.");
+                alert("O GPS está bloqueado. Clique no ícone de cadeado/ajustes no topo do navegador e ative a Localização.");
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
 
-    // Máscaras e Itens (Mantidos do anterior)
     function maskTel(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); v = v.replace(/(\d)(\d{4})$/, "$1-$2"); i.value = v; }
     function maskCNPJ(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/, "$1.$2"); v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); v = v.replace(/(\d{4})(\d)/, "$1-$2"); i.value = v; }
 
@@ -168,7 +164,15 @@
     itens.forEach(it => { document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; });
 
     const fLabels = ["Foto Frente", "Foto Lat. Direita", "Foto Traseira", "Foto Lat. Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM"];
-    fLabels.forEach((l, i) => { document.getElementById('gridFotos').innerHTML += `<div class="photo-item">${l}<input type="file" accept="image/*" onchange="compactar(this, ${i+1})" required><img id="v${i+1}" class="preview-img"></div>`; });
+    // CORREÇÃO AQUI: Adicionado accept e capture para abrir câmera direta
+    fLabels.forEach((l, i) => { 
+        document.getElementById('gridFotos').innerHTML += `
+            <div class="photo-item">
+                ${l}
+                <input type="file" accept="image/*" capture="environment" onchange="compactar(this, ${i+1})" required>
+                <img id="v${i+1}" class="preview-img">
+            </div>`; 
+    });
 
     function compactar(input, id) {
         if (!input.files[0]) return;
@@ -193,7 +197,7 @@
 
     document.getElementById("formFever").onsubmit = async (e) => {
         e.preventDefault();
-        if (!gpsLiberado) { alert("GPS OBRIGATÓRIO! Siga as instruções no topo da página."); return; }
+        if (!gpsLiberado) { alert("GPS OBRIGATÓRIO!"); return; }
         if(pad.isEmpty()) return alert("Assinatura obrigatória!");
         
         document.getElementById("btn").disabled = true;
@@ -231,7 +235,7 @@
             document.getElementById("formFever").style.display = "none";
             document.getElementById("success-screen").style.display = "block";
         } catch (err) {
-            alert("Erro no envio. Tente novamente.");
+            alert("Erro no envio. Verifique sua conexão.");
             document.getElementById("btn").disabled = false;
             document.getElementById("loading").style.display = "none";
         }
