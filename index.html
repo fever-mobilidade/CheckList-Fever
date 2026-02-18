@@ -24,6 +24,10 @@
         #status-gps.erro { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         #status-gps.ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
+        /* Botão de Ativação Manual */
+        #btn-gps-manual { display: block; width: 100%; padding: 15px; background: #00ffcc; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 15px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
         #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: #00ffcc; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00ffcc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -47,12 +51,12 @@
         <h1 style="font-size: 80px; color: #00ffcc; margin: 0;">✔</h1>
         <h2>Checklist Enviado!</h2>
         <p>O relatório PDF foi gerado e enviado com sucesso.</p>
-        <p>Nossa equipe irá validar seu Checklist.</p>
-        <button onclick="window.close()" style="margin-top:30px; padding:15px; background:#000; color:#00ffcc; width:100%; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">SAIR</button>
+        <button onclick="location.reload()" style="margin-top:30px; padding:15px; background:#000; color:#00ffcc; width:100%; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">NOVO CHECKLIST</button>
     </div>
 
     <form id="formFever">
         <div id="status-gps">Aguardando autorização do sistema...</div>
+        <button type="button" id="btn-gps-manual" onclick="capturarGPS()">📍 CLIQUE AQUI PARA ATIVAR GPS</button>
 
         <label>Placa do veículo *</label>
         <input type="text" id="placa" required maxlength="8" placeholder="ABC-1234">
@@ -121,7 +125,7 @@
     const fotos = {};
     const canvas = document.getElementById('signature-pad');
     const pad = new SignaturePad(canvas);
-    let userLoc = "Aguardando GPS...";
+    let userLoc = "GPS não capturado";
     let gpsLiberado = false;
 
     function resizeCanvas() {
@@ -131,14 +135,14 @@
         canvas.getContext("2d").scale(ratio, ratio);
         pad.clear();
     }
-    window.onresize = resizeCanvas;
-    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    setTimeout(resizeCanvas, 500);
 
-    // FUNÇÃO QUE DISPARA A JANELA NATIVA DO CELULAR
     function capturarGPS() {
-        if (gpsLiberado) return; // Se já pegou, não pede de novo
-
         const statusDiv = document.getElementById('status-gps');
+        const btnManual = document.getElementById('btn-gps-manual');
+        
+        statusDiv.innerText = "Buscando satélites...";
         
         navigator.geolocation.getCurrentPosition(
             p => { 
@@ -146,26 +150,21 @@
                 gpsLiberado = true;
                 statusDiv.innerText = "✅ LOCALIZAÇÃO OK - GPS ATIVO";
                 statusDiv.className = "ok";
+                btnManual.style.display = "none";
             },
             e => { 
                 gpsLiberado = false;
                 statusDiv.className = "erro";
-                if (e.code === e.PERMISSION_DENIED) {
-                    statusDiv.innerHTML = "❌ GPS NEGADO: Clique no cadeado da barra de endereço e libere a localização.";
-                } else {
-                    statusDiv.innerText = "❌ ERRO GPS: Verifique se o sensor está ligado.";
-                }
+                statusDiv.innerHTML = "❌ GPS BLOQUEADO: Clique no cadeado (barra de endereço) e mude Localização para 'Permitir'.";
+                console.error(e);
             },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
 
-    // Tenta disparar no carregamento
-    window.addEventListener('load', capturarGPS);
-    
-    // Tenta disparar ao primeiro toque na tela (Garante que a janela abra se o browser bloquear o carregamento automático)
-    window.addEventListener('touchstart', capturarGPS, {once: true});
-    window.addEventListener('click', capturarGPS, {once: true});
+    // Dispara ao carregar e ao tocar na tela para vencer bloqueios de navegadores
+    window.onload = capturarGPS;
+    document.addEventListener('touchstart', () => { if(!gpsLiberado) capturarGPS(); }, {once: true});
 
     function maskTel(i) {
         let v = i.value.replace(/\D/g, "");
@@ -176,7 +175,6 @@
 
     function maskCNPJ(i) {
         let v = i.value.replace(/\D/g, "");
-        if (v.length > 14) v = v.slice(0, 14);
         v = v.replace(/^(\d{2})(\d)/, "$1.$2");
         v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
         v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
@@ -205,6 +203,7 @@
     });
 
     function compactar(input, id) {
+        if (!input.files[0]) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
@@ -229,7 +228,7 @@
         e.preventDefault();
 
         if (!gpsLiberado) {
-            alert("A LOCALIZAÇÃO É OBRIGATÓRIA! O sistema precisa da confirmação do GPS para prosseguir.");
+            alert("ERRO: O GPS é obrigatório para auditoria digital!");
             capturarGPS();
             return;
         }
@@ -261,27 +260,17 @@
             desc: document.getElementById("desc").value || "Sem observações",
             assinatura: pad.toDataURL(),
             localizacao: userLoc,
-            dispositivo: navigator.userAgent,
             timestamp: new Date().toLocaleString("pt-BR")
         };
 
-       try {
-            const scriptURL = "https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec"; 
-            
-            await fetch(scriptURL, { 
-                method: "POST", 
-                mode: "no-cors", 
-                body: JSON.stringify(payload) 
-            });
-            
+        try {
+            const scriptURL = "https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec";
+            await fetch(scriptURL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             document.getElementById("loading").style.display = "none";
             document.getElementById("formFever").style.display = "none";
             document.getElementById("success-screen").style.display = "block";
-
-            setTimeout(() => { window.close(); }, 5000); 
-            
         } catch (err) {
-            alert("Erro no envio. Verifique sua conexão.");
+            alert("Erro no envio. Tente novamente.");
             document.getElementById("btn").disabled = false;
             document.getElementById("loading").style.display = "none";
         }
