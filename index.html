@@ -2,78 +2,116 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Checklist Digital FEVER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist FEVER Oficial</title>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
-        :root { --fever-green: #00ffcc; --fever-black: #000; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 10px; background: #ececec; color: #333; }
-        .container { max-width: 600px; margin: auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .header { text-align: center; background: var(--fever-black); color: #fff; padding: 25px; border-radius: 10px 10px 0 0; margin: -15px -15px 20px -15px; border-bottom: 5px solid var(--fever-green); }
-        .header h1 { margin: 0; color: var(--fever-green); font-size: 26px; text-transform: uppercase; letter-spacing: 2px; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 15px; background: #f4f4f4; color: #333; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; background: #000; color: #fff; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px; border-bottom: 4px solid #00ffcc; }
+        .header h1 { margin: 0; color: #00ffcc; letter-spacing: 2px; font-size: 28px; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .check-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+        .check-table th, .check-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .photo-item { background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #ddd; }
+        .preview-img { width: 100%; height: auto; max-height: 250px; object-fit: contain; display: none; margin-top: 10px; border: 2px solid #000; border-radius: 4px; }
+        canvas#signature-pad { border: 2px solid #000; width: 100%; height: 200px; background: #fff; border-radius: 4px; cursor: crosshair; touch-action: none; }
+        button#btn { width: 100%; padding: 18px; background: #000; color: #00ffcc; border: none; font-weight: bold; font-size: 18px; cursor: pointer; border-radius: 4px; margin-top: 20px; }
         
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 13px; color: #555; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: var(--fever-green); outline: none; }
+        #status-gps { padding: 12px; margin: 15px 0; border-radius: 6px; text-align: center; font-weight: bold; font-size: 14px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        #status-gps.erro { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        #status-gps.ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        #btn-gps-manual { display: block; width: 100%; padding: 15px; background: #00ffcc; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
 
-        .status-box { padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; border: 2px solid #ccc; }
-        .status-gps-off { background: #fff3cd; color: #856404; }
-        .status-gps-on { background: #d4edda; color: #155724; border-color: #c3e6cb; }
-
-        .photo-item { background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px dashed #bbb; margin-bottom: 15px; text-align: center; }
-        .photo-item label { margin-bottom: 10px; font-size: 14px; }
-        .preview-img { width: 100%; max-height: 300px; border-radius: 6px; display: none; margin-top: 10px; border: 2px solid var(--fever-black); }
-
-        canvas#signature-pad { border: 2px solid var(--fever-black); width: 100%; height: 200px; background: #fff; border-radius: 8px; touch-action: none; }
-        
-        button#btn-main { width: 100%; padding: 20px; background: var(--fever-black); color: var(--fever-green); border: none; font-weight: bold; font-size: 18px; cursor: pointer; border-radius: 8px; margin-top: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        button:disabled { background: #666; color: #ccc; cursor: not-allowed; }
-
-        #loading { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; color: var(--fever-green); text-align: center; }
-        .spinner { border: 6px solid #333; border-top: 6px solid var(--fever-green); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: #00ffcc; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00ffcc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #success-screen { display: none; text-align: center; padding: 40px 10px; }
     </style>
 </head>
 <body>
 
 <div id="loading">
     <div class="spinner"></div>
-    <p style="font-size: 18px;">ENVIANDO AUDITORIA DIGITAL...<br>Não feche o navegador.</p>
+    <p>GERANDO AUDITORIA DIGITAL...<br>Aguarde o envio oficial.</p>
 </div>
 
 <div class="container">
     <div class="header">
         <h1>FEVER</h1>
-        <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.8;">SISTEMA OFICIAL DE VISTORIA</p>
+        <p>O FUTURO É ELETRIZANTE</p>
+    </div>
+
+    <div id="success-screen">
+        <h1 style="font-size: 80px; color: #00ffcc; margin: 0;">✔</h1>
+        <h2>Enviado com Sucesso!</h2>
+        <button onclick="location.reload()" id="btn">NOVO CHECKLIST</button>
     </div>
 
     <form id="formFever">
-        <div id="status-gps" class="status-box status-gps-off">
-            📍 Localização Necessária para Validação
-            <button type="button" onclick="ativarGPS()" id="btn-gps" style="display:block; width:100%; margin-top:10px; padding:10px; background:var(--fever-black); color:#fff; border-radius:5px; border:none; cursor:pointer;">HABILITAR LOCALIZAÇÃO</button>
-        </div>
+        <div id="status-gps">GPS Necessário</div>
+        <button type="button" id="btn-gps-manual" onclick="capturarGPS()">📍 CLIQUE PARA ATIVAR LOCALIZAÇÃO</button>
 
         <label>Placa do veículo *</label>
-        <input type="text" id="placa" required placeholder="Ex: ABC1D23" oninput="this.value = this.value.toUpperCase()">
+        <input type="text" id="placa" required maxlength="8" placeholder="ABC-1234">
+
+        <label>Chassi (8 últimos) *</label>
+        <input type="text" id="chassi" maxlength="8" required>
+
+        <label>Modelo *</label>
+        <select id="modeloVeiculo" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="NEXTEM FN1000 HIGH BOX">NEXTEM FN1000 HIGH BOX</option>
+            <option value="NEXTEM FN1000 MEGA BOX">NEXTEM FN1000 MEGA BOX</option>
+            <option value="RAP FR250 BOX">RAP FR250 BOX</option>
+            <option value="RAP FR150 FRIGO">RAP FR150 FRIGO</option>
+            <option value="RAP FR110 BOX">RAP FR110 BOX</option>
+        </select>
 
         <label>KM Atual *</label>
-        <input type="number" id="km" required placeholder="00000">
+        <input type="number" id="km" required>
 
-        <label>Cliente / Empresa *</label>
+        <label>Empresa (Cliente) *</label>
         <input type="text" id="empresa" required>
 
-        <h3>Vistoria Técnica</h3>
-        <div id="corpoChecklist"></div>
+        <label>CNPJ Empresa *</label>
+        <input type="text" id="cnpj" oninput="maskCNPJ(this)" placeholder="00.000.000/0000-00" required>
 
-        <h3>Evidências Fotográficas</h3>
-        <p style="font-size: 11px; color: #777;">Toque nos botões para tirar foto ou escolher da galeria.</p>
+        <label>Nome do Usuário *</label>
+        <input type="text" id="cliente" required>
+
+        <label>Telefone *</label>
+        <input type="tel" id="telefone" oninput="maskTel(this)" placeholder="(00) 00000-0000" required>
+
+        <label>Data *</label>
+        <input type="date" id="dataRecebimento" required>
+
+        <h3>Checklist</h3>
+        <table class="check-table">
+            <thead>
+                <tr><th style="text-align:left">Item</th><th>Ok</th><th>Não Ok</th><th>N/A</th></tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+
+        <label>Dano constatado?</label>
+        <select id="dano" onchange="document.getElementById('campoObs').style.display=(this.value=='Sim'?'block':'none')">
+            <option value="Não">Não</option>
+            <option value="Sim">Sim</option>
+        </select>
+        <div id="campoObs" style="display:none;">
+            <textarea id="desc" rows="3" placeholder="Descreva os danos..."></textarea>
+        </div>
+
+        <h3>Fotos (Câmera ou Arquivo)</h3>
         <div id="gridFotos"></div>
 
-        <h3>Assinatura do Responsável *</h3>
+        <h3>Assinatura *</h3>
         <canvas id="signature-pad"></canvas>
-        <button type="button" onclick="pad.clear()" style="margin-top:8px; background:none; border:none; color:red; text-decoration:underline; cursor:pointer;">Limpar Assinatura</button>
+        <button type="button" onclick="pad.clear()" style="width:100%; padding:10px; margin-top:5px;">Limpar</button>
         
-        <button type="submit" id="btn-main">FINALIZAR E ENVIAR OFICIAL</button>
+        <button type="submit" id="btn">FINALIZAR E ENVIAR</button>
     </form>
 </div>
 
@@ -81,10 +119,9 @@
     const fotos = {};
     const canvas = document.getElementById('signature-pad');
     const pad = new SignaturePad(canvas);
-    let userLoc = "GPS NÃO AUTORIZADO";
-    let gpsAtivo = false;
+    let userLoc = "GPS não capturado";
+    let gpsLiberado = false;
 
-    // Ajuste de DPI da Assinatura
     function resizeCanvas() {
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         canvas.width = canvas.offsetWidth * ratio;
@@ -95,137 +132,92 @@
     window.addEventListener("resize", resizeCanvas);
     setTimeout(resizeCanvas, 500);
 
-    // FUNÇÃO GPS ROBUSTA (IOS E ANDROID)
-    function ativarGPS() {
-        if (!navigator.geolocation) {
-            alert("Seu navegador não suporta GPS.");
-            return;
-        }
-
-        const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
-
+    function capturarGPS() {
+        if (!navigator.geolocation) return alert("GPS não suportado.");
         navigator.geolocation.getCurrentPosition(
-            p => {
-                userLoc = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
-                gpsAtivo = true;
+            p => { 
+                userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude}`; 
+                gpsLiberado = true;
                 const s = document.getElementById('status-gps');
-                s.className = "status-box status-gps-on";
-                s.innerHTML = "✅ LOCALIZAÇÃO CAPTURADA COM SUCESSO";
+                s.innerText = "✅ GPS ATIVO";
+                s.className = "ok";
+                document.getElementById('btn-gps-manual').style.display = "none";
             },
-            e => {
-                let msg = "Erro ao obter GPS.";
-                if(e.code == 1) msg = "Acesso ao GPS Negado. Por favor, habilite nas configurações do seu celular/navegador.";
-                alert(msg);
-            }, 
-            options
+            e => alert("Erro GPS: Ative a localização no seu celular."),
+            { enableHighAccuracy: true, timeout: 10000 }
         );
     }
 
-    // Gerar Checklist
-    const itens = ["Pintura/Lataria", "Pneus/Rodas", "Parabrisa/Luzes", "Kit Ferramentas", "Nível de Bateria", "Higienização"];
-    itens.forEach(it => {
-        document.getElementById('corpoChecklist').innerHTML += `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
-                <span style="font-size:14px;">${it}</span>
-                <div>
-                    <input type="radio" name="${it}" value="OK" required style="width:20px;"> OK
-                    <input type="radio" name="${it}" value="AVARIA" style="width:20px; margin-left:10px;"> AVARIA
-                </div>
-            </div>`;
-    });
+    function maskTel(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); v = v.replace(/(\d)(\d{4})$/, "$1-$2"); i.value = v; }
+    function maskCNPJ(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/, "$1.$2"); v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); v = v.replace(/(\d{4})(\d)/, "$1-$2"); i.value = v; }
 
-    // GERADOR DE FOTOS ROBUSTO
-    const fLabels = ["Frente", "Lateral Direita", "Traseira", "Lateral Esquerda", "Painel/KM"];
-    fLabels.forEach((l, i) => {
+    const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Documentação", "Chave do veiculo", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Reparo do Pneu", "Central Multimidia"];
+    itens.forEach(it => { document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; });
+
+    const fLabels = ["Foto Frente", "Foto Lat. Direita", "Foto Traseira", "Foto Lat. Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM"];
+    fLabels.forEach((l, i) => { 
         document.getElementById('gridFotos').innerHTML += `
             <div class="photo-item">
                 <label>${l}</label>
-                <input type="file" accept="image/*" onchange="processarFoto(this, ${i+1})" required>
+                <input type="file" accept="image/*" onchange="compactar(this, ${i+1})" required>
                 <img id="v${i+1}" class="preview-img">
-            </div>`;
+            </div>`; 
     });
 
-    function processarFoto(input, id) {
-        if (!input.files || !input.files[0]) return;
-        
+    function compactar(input, id) {
+        if (!input.files[0]) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = (e) => {
             const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const MAX_WIDTH = 1000;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                }
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // Marca d'água de segurança na foto
-                ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-                ctx.fillRect(0, height - 25, width, 25);
-                ctx.font = "bold 14px Arial";
-                ctx.fillStyle = "black";
-                ctx.fillText(`FEVER VISTORIA - ${new Date().toLocaleString()}`, 10, height - 8);
-
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                fotos['foto'+id] = dataUrl;
+            img.onload = () => {
+                const cv = document.createElement('canvas');
+                const max = 800; let w = img.width, h = img.height;
+                if (w > max) { h *= max / w; w = max; }
+                cv.width = w; cv.height = h;
+                cv.getContext('2d').drawImage(img, 0, 0, w, h);
+                const b64 = cv.toDataURL('image/jpeg', 0.6);
+                fotos['foto'+id] = b64;
                 const preview = document.getElementById('v'+id);
-                preview.src = dataUrl;
-                preview.style.display = 'block';
-            }
+                preview.src = b64; preview.style.display = 'block';
+            };
             img.src = e.target.result;
-        }
+        };
         reader.readAsDataURL(input.files[0]);
     }
 
     document.getElementById("formFever").onsubmit = async (e) => {
         e.preventDefault();
-        
-        if(pad.isEmpty()) return alert("Assinatura é obrigatória!");
-        if(!gpsAtivo) {
-            if(!confirm("GPS não capturado. Deseja prosseguir apenas com o selo de hora da assinatura?")) return;
-        }
-
+        if(pad.isEmpty()) return alert("Assinatura obrigatória!");
+        document.getElementById("btn").disabled = true;
         document.getElementById("loading").style.display = "flex";
-        document.getElementById("btn-main").disabled = true;
-
-        const checklistFinal = {};
-        itens.forEach(it => {
-            checklistFinal[it] = document.querySelector(`input[name="${it}"]:checked`).value;
-        });
 
         const payload = {
-            placa: document.getElementById("placa").value,
-            empresa: document.getElementById("empresa").value,
-            km: document.getElementById("km").value,
-            checklist: checklistFinal,
             ...fotos,
+            placa: document.getElementById("placa").value,
+            chassi: document.getElementById("chassi").value,
+            modelo: document.getElementById("modeloVeiculo").value,
+            km: document.getElementById("km").value,
+            empresa: document.getElementById("empresa").value,
+            cnpj: document.getElementById("cnpj").value,
+            cliente: document.getElementById("cliente").value,
+            telefone: document.getElementById("telefone").value,
+            dataRecebimento: document.getElementById("dataRecebimento").value,
+            dano: document.getElementById("dano").value,
+            desc: document.getElementById("desc").value || "Sem observações",
             assinatura: pad.toDataURL(),
             localizacao: userLoc,
-            dataHora: new Date().toLocaleString("pt-BR")
+            timestamp: new Date().toLocaleString("pt-BR")
         };
 
         try {
-            // URL DO SEU GOOGLE APPS SCRIPT
-            const URL = "https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec";
-            
-            await fetch(URL, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify(payload)
-            });
-
-            alert("Vistoria enviada com sucesso!");
-            location.reload();
+            const scriptURL = "https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec";
+            await fetch(scriptURL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("formFever").style.display = "none";
+            document.getElementById("success-screen").style.display = "block";
         } catch (err) {
-            alert("Erro ao enviar. Verifique sua internet.");
-            document.getElementById("btn-main").disabled = false;
+            alert("Erro no envio.");
+            document.getElementById("btn").disabled = false;
             document.getElementById("loading").style.display = "none";
         }
     };
