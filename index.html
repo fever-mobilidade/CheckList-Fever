@@ -50,8 +50,8 @@
     </div>
 
     <form id="formFever">
-        <div id="status-gps">GPS Necessário</div>
-        <button type="button" id="btn-gps-manual" onclick="capturarGPS()">📍 CLIQUE PARA ATIVAR LOCALIZAÇÃO</button>
+        <div id="status-gps">GPS Requerido</div>
+        <button type="button" id="btn-gps-manual" onclick="capturarGPS()">📍 ATIVAR LOCALIZAÇÃO (GPS)</button>
 
         <label>Placa do veículo *</label>
         <input type="text" id="placa" required maxlength="8" placeholder="ABC-1234">
@@ -104,7 +104,7 @@
             <textarea id="desc" rows="3" placeholder="Descreva os danos..."></textarea>
         </div>
 
-        <h3>Fotos (Câmera ou Arquivo)</h3>
+        <h3>Fotos (Câmera ou Galeria)</h3>
         <div id="gridFotos"></div>
 
         <h3>Assinatura *</h3>
@@ -143,7 +143,7 @@
                 s.className = "ok";
                 document.getElementById('btn-gps-manual').style.display = "none";
             },
-            e => alert("Erro GPS: Ative a localização no seu celular."),
+            e => alert("Por favor, ative a localização no seu celular e permita o acesso no navegador."),
             { enableHighAccuracy: true, timeout: 10000 }
         );
     }
@@ -155,10 +155,12 @@
     itens.forEach(it => { document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; });
 
     const fLabels = ["Foto Frente", "Foto Lat. Direita", "Foto Traseira", "Foto Lat. Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM"];
+    
+    // ATUALIZAÇÃO PARA FORÇAR SELEÇÃO CÂMERA/ARQUIVO NO CHROME ANDROID
     fLabels.forEach((l, i) => { 
         document.getElementById('gridFotos').innerHTML += `
             <div class="photo-item">
-                <label>${l}</label>
+                <label style="margin-bottom:10px; display:block;">${l}</label>
                 <input type="file" accept="image/*" onchange="compactar(this, ${i+1})" required>
                 <img id="v${i+1}" class="preview-img">
             </div>`; 
@@ -171,11 +173,12 @@
             const img = new Image();
             img.onload = () => {
                 const cv = document.createElement('canvas');
-                const max = 800; let w = img.width, h = img.height;
+                const max = 1000; // Qualidade melhorada
+                let w = img.width, h = img.height;
                 if (w > max) { h *= max / w; w = max; }
                 cv.width = w; cv.height = h;
                 cv.getContext('2d').drawImage(img, 0, 0, w, h);
-                const b64 = cv.toDataURL('image/jpeg', 0.6);
+                const b64 = cv.toDataURL('image/jpeg', 0.7);
                 fotos['foto'+id] = b64;
                 const preview = document.getElementById('v'+id);
                 preview.src = b64; preview.style.display = 'block';
@@ -188,6 +191,8 @@
     document.getElementById("formFever").onsubmit = async (e) => {
         e.preventDefault();
         if(pad.isEmpty()) return alert("Assinatura obrigatória!");
+        if(!gpsLiberado) return alert("Por favor, ative o GPS antes de enviar.");
+        
         document.getElementById("btn").disabled = true;
         document.getElementById("loading").style.display = "flex";
 
