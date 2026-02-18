@@ -23,8 +23,7 @@
         #status-gps.erro { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         #status-gps.ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
-        #btn-gps-manual { display: block; width: 100%; padding: 15px; background: #00ffcc; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 15px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.98); } 100% { transform: scale(1); } }
+        #btn-gps-manual { display: none; width: 100%; padding: 15px; background: #00ffcc; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
 
         #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: #00ffcc; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00ffcc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
@@ -32,9 +31,7 @@
         #success-screen { display: none; text-align: center; padding: 40px 10px; }
     </style>
 </head>
-<body>
-
-<div id="loading">
+<body onload="capturarGPS()"> <div id="loading">
     <div class="spinner"></div>
     <p>GERANDO AUDITORIA DIGITAL...<br>Aguarde o envio oficial.</p>
 </div>
@@ -52,8 +49,8 @@
     </div>
 
     <form id="formFever">
-        <div id="status-gps">Aguardando GPS...</div>
-        <button type="button" id="btn-gps-manual" onclick="capturarGPS()">📍 CLIQUE AQUI PARA ATIVAR GPS</button>
+        <div id="status-gps">Solicitando localização...</div>
+        <button type="button" id="btn-gps-manual" onclick="capturarGPS()">📍 TENTAR ATIVAR GPS NOVAMENTE</button>
 
         <label>Placa do veículo *</label>
         <input type="text" id="placa" required maxlength="8" placeholder="ABC-1234">
@@ -109,7 +106,7 @@
         <h3>Fotos (Câmera ou Galeria)</h3>
         <div id="gridFotos"></div>
 
-        <h3>Assinatura Digital *</h3>
+        <h3>Assinatura *</h3>
         <canvas id="signature-pad"></canvas>
         <button type="button" onclick="pad.clear()" style="width:100%; padding:10px; margin-top:5px;">Limpar</button>
         
@@ -134,10 +131,15 @@
     window.addEventListener("resize", resizeCanvas);
     setTimeout(resizeCanvas, 500);
 
+    // FUNÇÃO GPS AUTOMÁTICA
     function capturarGPS() {
         const statusDiv = document.getElementById('status-gps');
         const btnManual = document.getElementById('btn-gps-manual');
-        statusDiv.innerText = "Solicitando acesso...";
+        
+        if (!navigator.geolocation) {
+            statusDiv.innerText = "❌ GPS não suportado neste aparelho.";
+            return;
+        }
 
         navigator.geolocation.getCurrentPosition(
             p => { 
@@ -150,8 +152,8 @@
             e => { 
                 gpsLiberado = false;
                 statusDiv.className = "erro";
-                statusDiv.innerHTML = "❌ GPS BLOQUEADO: Clique no cadeado/ajustes da barra de endereço e permita a Localização.";
-                alert("O GPS está bloqueado. Ative a localização nas definições do navegador (ícone do cadeado).");
+                statusDiv.innerText = "❌ GPS BLOQUEADO: Ative nas configurações do navegador.";
+                btnManual.style.display = "block";
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
@@ -164,7 +166,8 @@
     itens.forEach(it => { document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; });
 
     const fLabels = ["Foto Frente", "Foto Lat. Direita", "Foto Traseira", "Foto Lat. Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM"];
-    // AJUSTADO: Removido 'capture' para permitir a escolha entre Câmera e Arquivos
+    
+    // AJUSTADO: Removido o atributo 'capture' para permitir escolha entre galeria e câmera
     fLabels.forEach((l, i) => { 
         document.getElementById('gridFotos').innerHTML += `
             <div class="photo-item">
@@ -197,7 +200,7 @@
 
     document.getElementById("formFever").onsubmit = async (e) => {
         e.preventDefault();
-        if (!gpsLiberado) { alert("GPS OBRIGATÓRIO!"); return; }
+        if (!gpsLiberado) { alert("GPS OBRIGATÓRIO! Por favor, autorize a localização no navegador."); return; }
         if(pad.isEmpty()) return alert("Assinatura obrigatória!");
         
         document.getElementById("btn").disabled = true;
@@ -235,7 +238,7 @@
             document.getElementById("formFever").style.display = "none";
             document.getElementById("success-screen").style.display = "block";
         } catch (err) {
-            alert("Erro no envio. Verifique a conexão.");
+            alert("Erro no envio. Tente novamente.");
             document.getElementById("btn").disabled = false;
             document.getElementById("loading").style.display = "none";
         }
