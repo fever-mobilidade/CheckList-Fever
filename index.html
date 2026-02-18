@@ -6,15 +6,14 @@
     <title>Checklist FEVER Oficial</title>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
+        /* Estilos mantidos conforme sua identidade visual */
         body { font-family: Arial, sans-serif; margin: 0; padding: 15px; background: #f4f4f4; color: #333; }
         .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         .header { text-align: center; background: #000; color: #fff; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px; border-bottom: 4px solid #00ffcc; }
         .header h1 { margin: 0; color: #00ffcc; letter-spacing: 2px; font-size: 28px; }
-        
         #step-gps { text-align: center; padding: 40px 10px; }
         #step-form { display: none; }
         #success-screen { display: none; text-align: center; padding: 40px 10px; }
-
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
         .check-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
@@ -22,12 +21,9 @@
         .photo-item { background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #ddd; }
         .preview-img { width: 100%; height: auto; max-height: 250px; object-fit: contain; display: none; margin-top: 10px; border: 2px solid #000; border-radius: 4px; }
         canvas#signature-pad { border: 2px solid #000; width: 100%; height: 200px; background: #fff; border-radius: 4px; cursor: crosshair; touch-action: none; }
-        
         .btn-main { width: 100%; padding: 18px; background: #000; color: #00ffcc; border: none; font-weight: bold; font-size: 18px; cursor: pointer; border-radius: 4px; margin-top: 20px; }
         .btn-gps { background: #00ffcc; color: #000; animation: pulse 2s infinite; }
-        
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
         #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: #00ffcc; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00ffcc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -44,25 +40,23 @@
     <div class="header">
         <h1>FEVER</h1>
         <p>O FUTURO É ELETRIZANTE</p>
-        <p>Checklist veículo</p>
     </div>
 
     <div id="step-gps">
-        <h2>Bem-vindo à Auditoria Digital</h2>
-        <p>Para prosseguir, precisamos registrar a localização oficial (GPS).</p>
-        <button type="button" class="btn-main btn-gps" onclick="ativarGPS()">📍 CLIQUE AQUI PARA ATIVAR GPS</button>
-        <p id="msg-gps" style="margin-top:20px; color: #666; font-size: 14px;">Aguardando sinal de satélite...</p>
+        <h2>Sincronizando Satélites</h2>
+        <p>Aguarde a calibração da sua posição real para liberar o formulário.</p>
+        <button type="button" id="btn-gps-trigger" class="btn-main btn-gps" onclick="ativarGPS()">📍 OBTER LOCALIZAÇÃO EXATA</button>
+        <p id="msg-gps" style="margin-top:20px; font-weight: bold; color: #333;">Status: Inativo</p>
+        <p id="precisao-info" style="font-size: 12px; color: #666;"></p>
     </div>
 
     <div id="step-form">
         <form id="formFever">
             <label>Placa do veículo *</label>
-            <input type="text" id="placa" required maxlength="8" placeholder="ABC-1234">
-
+            <input type="text" id="placa" required placeholder="ABC-1234">
             <label>Chassi (8 últimos) *</label>
-            <input type="text" id="chassi" maxlength="8" required placeholder="RA100256">
-
-            <label>Modelo do veículo*</label>
+            <input type="text" id="chassi" maxlength="8" required>
+            <label>Modelo *</label>
             <select id="modeloVeiculo" required>
                 <option value="" disabled selected>Selecione</option>
                 <option value="NEXTEM FN1000 HIGH BOX">NEXTEM FN1000 HIGH BOX</option>
@@ -71,22 +65,16 @@
                 <option value="RAP FR150 FRIGO">RAP FR150 FRIGO</option>
                 <option value="RAP FR110 BOX">RAP FR110 BOX</option>
             </select>
-
             <label>KM Atual *</label>
             <input type="number" id="km" required>
-
             <label>Empresa (Cliente) *</label>
             <input type="text" id="empresa" required>
-
             <label>CNPJ Empresa *</label>
             <input type="text" id="cnpj" oninput="maskCNPJ(this)" placeholder="00.000.000/0000-00" required>
-
             <label>Nome do Usuário *</label>
             <input type="text" id="cliente" required>
-
             <label>Telefone *</label>
             <input type="tel" id="telefone" oninput="maskTel(this)" placeholder="(00) 00000-0000" required>
-
             <label>Data *</label>
             <input type="date" id="dataRecebimento" required>
 
@@ -117,55 +105,67 @@
         <h1 style="font-size: 80px; color: #00ffcc; margin: 0;">✔</h1>
         <h2>Enviado com Sucesso!</h2>
         <button onclick="location.reload()" class="btn-main">NOVO CHECKLIST</button>
-        <button onclick="fecharJanela()" class="btn-main" id="btn-fechar">FECHAR EM <span id="timer">10</span>s</button>
     </div>
 </div>
 
 <script>
-    const fotos = {};
-    let userLoc = "";
+    let userLoc = "Não capturado";
+    let watchId = null;
     const canvas = document.getElementById('signature-pad');
     let pad;
+    const fotos = {};
 
     function ativarGPS() {
         const msg = document.getElementById('msg-gps');
-        msg.innerText = "Buscando localização via satélite (precisão máxima)...";
+        const info = document.getElementById('precisao-info');
+        const btn = document.getElementById('btn-gps-trigger');
+        
+        btn.disabled = true;
+        btn.innerText = "CALIBRANDO...";
 
-        if (!navigator.geolocation) return alert("Seu navegador não suporta GPS.");
+        if (!navigator.geolocation) return alert("Seu celular não suporta GPS.");
 
-        // CONFIGURAÇÃO DE ALTA PRECISÃO AJUSTADA
-        const options = {
-            enableHighAccuracy: true, // FORÇA O USO DE GPS (SATÉLITE)
-            timeout: 15000,           // DÁ 15 SEGUNDOS PARA O GPS FIXAR
-            maximumAge: 0             // NÃO ACEITA LOCALIZAÇÃO ANTIGA DO CACHE
-        };
-
-        navigator.geolocation.getCurrentPosition(
+        // O SEGREDO: watchPosition em vez de getCurrentPosition
+        // Ele vai "refinando" a localização até ficar exata
+        watchId = navigator.geolocation.watchPosition(
             p => {
-                userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude} (Precisão: ${p.coords.accuracy.toFixed(1)}m)`;
-                document.getElementById('step-gps').style.display = 'none';
-                document.getElementById('step-form').style.display = 'block';
-                initSignature();
-                window.scrollTo(0,0);
+                const lat = p.coords.latitude;
+                const lon = p.coords.longitude;
+                const acc = p.coords.accuracy; // Precisão em metros
+
+                msg.innerText = `Sinal encontrado!`;
+                info.innerText = `Precisão atual: ${acc.toFixed(0)} metros...`;
+
+                // Só libera se a precisão for menor que 100 metros (ajustável)
+                // Se o Chrome der uma posição de torre (km de distância), ele ignora
+                if (acc < 150) {
+                    navigator.geolocation.clearWatch(watchId); // Para de gastar bateria
+                    userLoc = `Lat: ${lat} Lon: ${lon} (Precisão: ${acc.toFixed(1)}m)`;
+                    
+                    setTimeout(() => {
+                        document.getElementById('step-gps').style.display = 'none';
+                        document.getElementById('step-form').style.display = 'block';
+                        pad = new SignaturePad(canvas);
+                        resizeCanvas();
+                    }, 1000);
+                }
             },
             e => {
-                alert("ERRO DE GPS: Certifique-se de estar em local aberto e com o GPS do celular ligado.");
-                msg.innerText = "❌ Erro ao obter precisão. Tente novamente.";
+                alert("Erro: Permita o acesso ao GPS e certifique-se de que ele está ligado no modo Alta Precisão.");
+                btn.disabled = false;
+                btn.innerText = "TENTAR NOVAMENTE";
             },
-            options
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
         );
     }
 
-    // --- Mantenha o restante das suas funções de assinatura, máscaras e envio ---
-    function initSignature() { pad = new SignaturePad(canvas); resizeCanvas(); }
+    // --- Funções de suporte (Máscaras, Fotos, Checklist) ---
     function resizeCanvas() {
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         canvas.width = canvas.offsetWidth * ratio;
         canvas.height = canvas.offsetHeight * ratio;
         canvas.getContext("2d").scale(ratio, ratio);
-        if(pad) pad.clear();
     }
-    window.addEventListener("resize", resizeCanvas);
 
     function maskTel(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); v = v.replace(/(\d)(\d{4})$/, "$1-$2"); i.value = v; }
     function maskCNPJ(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/, "$1.$2"); v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); v = v.replace(/(\d{4})(\d)/, "$1-$2"); i.value = v; }
@@ -199,26 +199,41 @@
         reader.readAsDataURL(input.files[0]);
     }
 
-    function fecharJanela() { window.close(); setTimeout(() => { if (!window.closed) window.location.href = "about:blank"; }, 500); }
-    function iniciarContagemRegressiva() {
-        let seg = 10; const d = document.getElementById('timer');
-        const i = setInterval(() => { seg--; d.innerText = seg; if(seg <= 0){ clearInterval(i); fecharJanela(); }}, 1000);
-    }
-
     document.getElementById("formFever").onsubmit = async (e) => {
         e.preventDefault();
         if(pad.isEmpty()) return alert("Assinatura obrigatória!");
         document.getElementById("loading").style.display = "flex";
         const checks = {};
         itens.forEach(it => { const el = document.querySelector(`input[name="${it}"]:checked`); checks[it] = el ? el.value : "N/A"; });
-        const payload = { ...fotos, checklistItems: checks, placa: document.getElementById("placa").value, chassi: document.getElementById("chassi").value, modelo: document.getElementById("modeloVeiculo").value, km: document.getElementById("km").value, empresa: document.getElementById("empresa").value, cnpj: document.getElementById("cnpj").value, cliente: document.getElementById("cliente").value, telefone: document.getElementById("telefone").value, dataRecebimento: document.getElementById("dataRecebimento").value, dano: document.getElementById("dano").value, desc: document.getElementById("desc").value || "Sem obs", assinatura: pad.toDataURL(), localizacao: userLoc, timestamp: new Date().toLocaleString("pt-BR") };
+        
+        const payload = { 
+            ...fotos, 
+            checklistItems: checks, 
+            placa: document.getElementById("placa").value, 
+            chassi: document.getElementById("chassi").value, 
+            modelo: document.getElementById("modeloVeiculo").value, 
+            km: document.getElementById("km").value, 
+            empresa: document.getElementById("empresa").value, 
+            cnpj: document.getElementById("cnpj").value, 
+            cliente: document.getElementById("cliente").value, 
+            telefone: document.getElementById("telefone").value, 
+            dataRecebimento: document.getElementById("dataRecebimento").value, 
+            dano: document.getElementById("dano").value, 
+            desc: document.getElementById("desc").value || "Sem obs", 
+            assinatura: pad.toDataURL(), 
+            localizacao: userLoc, 
+            timestamp: new Date().toLocaleString("pt-BR") 
+        };
+
         try {
             await fetch("https://script.google.com/macros/s/AKfycbxuhQ5Ynz4CbNSTf-zlfmQxd6Hwt_Wnd5hkT3bawPQmG1LdHclWZy4SpzzdMrrqZtul/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             document.getElementById("loading").style.display = "none";
             document.getElementById("step-form").style.display = "none";
             document.getElementById("success-screen").style.display = "block";
-            iniciarContagemRegressiva();
-        } catch (err) { alert("Erro no envio."); document.getElementById("loading").style.display = "none"; }
+        } catch (err) { 
+            alert("Erro no envio."); 
+            document.getElementById("loading").style.display = "none"; 
+        }
     };
 </script>
 </body>
