@@ -31,7 +31,9 @@
         #success-screen { display: none; text-align: center; padding: 40px 10px; }
     </style>
 </head>
-<body onload="capturarGPS()"> <div id="loading">
+<body onload="capturarGPS()">
+
+<div id="loading">
     <div class="spinner"></div>
     <p>GERANDO AUDITORIA DIGITAL...<br>Aguarde o envio oficial.</p>
 </div>
@@ -103,7 +105,7 @@
             <textarea id="desc" rows="3" placeholder="Descreva os danos..."></textarea>
         </div>
 
-        <h3>Fotos (Câmera ou Galeria)</h3>
+        <h3>Fotos (Toque para Câmera ou Galeria)</h3>
         <div id="gridFotos"></div>
 
         <h3>Assinatura *</h3>
@@ -131,13 +133,12 @@
     window.addEventListener("resize", resizeCanvas);
     setTimeout(resizeCanvas, 500);
 
-    // FUNÇÃO GPS AUTOMÁTICA
     function capturarGPS() {
         const statusDiv = document.getElementById('status-gps');
         const btnManual = document.getElementById('btn-gps-manual');
         
         if (!navigator.geolocation) {
-            statusDiv.innerText = "❌ GPS não suportado neste aparelho.";
+            statusDiv.innerText = "❌ GPS não suportado.";
             return;
         }
 
@@ -152,7 +153,7 @@
             e => { 
                 gpsLiberado = false;
                 statusDiv.className = "erro";
-                statusDiv.innerText = "❌ GPS BLOQUEADO: Ative nas configurações do navegador.";
+                statusDiv.innerText = "❌ GPS BLOQUEADO: Ative a localização.";
                 btnManual.style.display = "block";
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -167,11 +168,11 @@
 
     const fLabels = ["Foto Frente", "Foto Lat. Direita", "Foto Traseira", "Foto Lat. Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM"];
     
-    // AJUSTADO: Removido o atributo 'capture' para permitir escolha entre galeria e câmera
+    // O segredo está em deixar apenas accept="image/*" para que o sistema operacional ofereça a escolha (Câmera ou Galeria)
     fLabels.forEach((l, i) => { 
         document.getElementById('gridFotos').innerHTML += `
             <div class="photo-item">
-                ${l}
+                <label style="margin:0 0 10px 0">${l}</label>
                 <input type="file" accept="image/*" onchange="compactar(this, ${i+1})" required>
                 <img id="v${i+1}" class="preview-img">
             </div>`; 
@@ -184,7 +185,8 @@
             const img = new Image();
             img.onload = () => {
                 const cv = document.createElement('canvas');
-                const max = 800; let w = img.width, h = img.height;
+                const max = 800; 
+                let w = img.width, h = img.height;
                 if (w > max) { h *= max / w; w = max; }
                 cv.width = w; cv.height = h;
                 cv.getContext('2d').drawImage(img, 0, 0, w, h);
@@ -200,7 +202,7 @@
 
     document.getElementById("formFever").onsubmit = async (e) => {
         e.preventDefault();
-        if (!gpsLiberado) { alert("GPS OBRIGATÓRIO! Por favor, autorize a localização no navegador."); return; }
+        if (!gpsLiberado) { alert("GPS OBRIGATÓRIO!"); return; }
         if(pad.isEmpty()) return alert("Assinatura obrigatória!");
         
         document.getElementById("btn").disabled = true;
@@ -238,7 +240,7 @@
             document.getElementById("formFever").style.display = "none";
             document.getElementById("success-screen").style.display = "block";
         } catch (err) {
-            alert("Erro no envio. Tente novamente.");
+            alert("Erro no envio.");
             document.getElementById("btn").disabled = false;
             document.getElementById("loading").style.display = "none";
         }
