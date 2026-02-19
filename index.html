@@ -38,9 +38,10 @@
 
     <div id="step-gps">
         <h2>Localização do Checklist</h2>
-        <p>Clique abaixo para registrar o local exato do CheckList.</p>
-        <button type="button" class="btn-main btn-gps" onclick="pegarLocalizacao()">📍 REGISTRAR LOCALIZAÇÃO</button>
-        <p id="status-gps" style="margin-top:15px; font-size:14px;"></p>
+        <p>Aguardando sinal de alta precisão (Satélite)...</p>
+        <button type="button" id="btn-gps" class="btn-main btn-gps" onclick="pegarLocalizacao()">📍 REGISTRAR LOCALIZAÇÃO</button>
+        <p id="status-gps" style="margin-top:15px; font-size:14px; font-weight: bold;"></p>
+        <p id="precisao-viva" style="font-size:12px; color:#666;"></p>
     </div>
 
     <div id="step-form">
@@ -99,33 +100,45 @@
     let pad;
     const fotos = {};
 
-    // FUNÇÃO QUE VOLTA A FUNCIONAR COMO ANTES (COM ALTA PRECISÃO)
     function pegarLocalizacao() {
         const status = document.getElementById('status-gps');
-        status.innerText = "Buscando sinal de GPS...";
+        const precisaoTxt = document.getElementById('precisao-viva');
+        const btn = document.getElementById('btn-gps');
+        
+        btn.disabled = true;
+        btn.innerText = "CALIBRANDO GPS...";
+        status.innerText = "Buscando satélites...";
         
         if (!navigator.geolocation) return alert("GPS não suportado.");
 
-        // Inicia o rastreio e já libera o formulário (como na primeira versão)
-        navigator.geolocation.getCurrentPosition(
+        // Força o hardware a ignorar o cache e buscar alta precisão
+        watchId = navigator.geolocation.watchPosition(
             (p) => {
-                userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude} (Aprox: ${p.coords.accuracy}m)`;
-                document.getElementById('step-gps').style.display = 'none';
-                document.getElementById('step-form').style.display = 'block';
-                pad = new SignaturePad(canvas);
-                resizeCanvas();
-                
-                // Fica "espiando" a localização para refinar enquanto o usuário preenche
-                watchId = navigator.geolocation.watchPosition(
-                    (pos) => {
-                        userLoc = `Lat: ${pos.coords.latitude} Lon: ${pos.coords.longitude} (Exato: ${pos.coords.accuracy}m)`;
-                    }, 
-                    null, 
-                    { enableHighAccuracy: true, maximumAge: 0 }
-                );
+                const acc = p.coords.accuracy;
+                precisaoTxt.innerText = `Margem de erro: ${acc.toFixed(1)} metros`;
+
+                // TRAVA DE SEGURANÇA: Só libera se a precisão for melhor que 65 metros
+                // (Isso garante que ele saia do sinal da torre e pegue o sinal da rua)
+                if (acc <= 65) {
+                    userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude} (GPS Real - Precisão: ${acc.toFixed(1)}m)`;
+                    navigator.geolocation.clearWatch(watchId);
+                    
+                    document.getElementById('step-gps').style.display = 'none';
+                    document.getElementById('step-form').style.display = 'block';
+                    pad = new SignaturePad(canvas);
+                    resizeCanvas();
+                    window.scrollTo(0,0);
+                } else {
+                    status.innerText = "Sinal impreciso (Torre). Aguardando Satélite...";
+                    status.style.color = "orange";
+                }
             },
-            (e) => alert("Por favor, ative o GPS do celular."),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            (e) => {
+                alert("Erro: Ative o GPS em modo 'Alta Precisão' e permita o acesso.");
+                btn.disabled = false;
+                btn.innerText = "TENTAR NOVAMENTE";
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
         );
     }
 
