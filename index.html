@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist FEVER Oficial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 15px; background: #f4f4f4; color: #333; }
         .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         .header { text-align: center; background: #000; color: #fff; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px; border-bottom: 4px solid #00ffcc; }
-        .header h1 { margin: 0; color: #00ffcc; letter-spacing: 2px; font-size: 28px; }
+        .header h1 { margin: 0; color: #00ffcc; letter-spacing: 2px; font-size: 30px; font-family: 'Oxanium', sans-serif; }
         #step-gps { text-align: center; padding: 40px 10px; }
         #step-form { display: none; }
         #success-screen { display: none; text-align: center; padding: 40px 10px; }
@@ -163,10 +164,10 @@
     function maskTel(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); v = v.replace(/(\d)(\d{4})$/, "$1-$2"); i.value = v; }
     function maskCNPJ(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/, "$1.$2"); v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); v = v.replace(/(\d{4})(\d)/, "$1-$2"); i.value = v; }
 
-    const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Documentação", "Chave do veiculo", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Reparo do Pneu", "Central Multimidia"];
+    const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Documentação", "Chave do veiculo e baú", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Kit Reparo do Pneu", "Central Multimidia"];
     itens.forEach(it => { document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; });
 
-    const fLabels = ["Foto Frente", "Foto Lat. Direita", "Foto Traseira", "Foto Lat. Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM"];
+    const fLabels = ["Foto de Frente", "Foto Lateral Direita (motorista)", "Foto Traseira", "Foto Lateral Esquerda (passageiro)", "Foto da Placa", "Foto do Chassi", "Foto do Painel/KM"];
     fLabels.forEach((l, i) => { 
         document.getElementById('gridFotos').innerHTML += `<div class="photo-item"><label>${l}</label><input type="file" accept="image/*" capture="camera" onchange="compactar(this, ${i+1})" required><img id="v${i+1}" class="preview-img"></div>`; 
     });
@@ -204,7 +205,9 @@
 
         try {
             // URL DO SEU SCRIPT GOOGLE
+
             const scriptURL = "https://script.google.com/macros/s/AKfycbwdGyTpGrKqaJz0VxDODzcBQeL25XaAsTiDV0mn7MKCYT6-0QzBgqnAYDayD71cApH4/exec";
+
             await fetch(scriptURL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             document.getElementById("loading").style.display = "none";
             document.getElementById("step-form").style.display = "none";
