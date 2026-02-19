@@ -38,7 +38,7 @@
 
     <div id="step-gps">
         <h2>Localização do Checklist</h2>
-        <p>Aguardando sinal de alta precisão (Satélite)...</p>
+        <p>Clique abaixo para registrar o local exato.</p>
         <button type="button" id="btn-gps" class="btn-main btn-gps" onclick="pegarLocalizacao()">📍 REGISTRAR LOCALIZAÇÃO</button>
         <p id="status-gps" style="margin-top:15px; font-size:14px; font-weight: bold;"></p>
         <p id="precisao-viva" style="font-size:12px; color:#666;"></p>
@@ -108,37 +108,37 @@
         btn.disabled = true;
         btn.innerText = "CALIBRANDO GPS...";
         status.innerText = "Buscando satélites...";
-        
+
         if (!navigator.geolocation) return alert("GPS não suportado.");
 
-        // Força o hardware a ignorar o cache e buscar alta precisão
+        // Força o GPS real e ignora o sinal de torre (Ajustado para o Aririu da Formiga)
         watchId = navigator.geolocation.watchPosition(
             (p) => {
                 const acc = p.coords.accuracy;
                 precisaoTxt.innerText = `Margem de erro: ${acc.toFixed(1)} metros`;
 
-                // TRAVA DE SEGURANÇA: Só libera se a precisão for melhor que 65 metros
-                // (Isso garante que ele saia do sinal da torre e pegue o sinal da rua)
+                // O SEGREDO: Só aceita se a precisão for menor que 65 metros (Satélite real)
                 if (acc <= 65) {
-                    userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude} (GPS Real - Precisão: ${acc.toFixed(1)}m)`;
+                    userLoc = `Lat: ${p.coords.latitude} Lon: ${p.coords.longitude} (Exato: ${acc.toFixed(1)}m)`;
                     navigator.geolocation.clearWatch(watchId);
                     
                     document.getElementById('step-gps').style.display = 'none';
                     document.getElementById('step-form').style.display = 'block';
-                    pad = new SignaturePad(canvas);
-                    resizeCanvas();
-                    window.scrollTo(0,0);
+                    if (!pad) {
+                        pad = new SignaturePad(canvas);
+                        resizeCanvas();
+                    }
                 } else {
-                    status.innerText = "Sinal impreciso (Torre). Aguardando Satélite...";
+                    status.innerText = "Sinal de rede detectado. Aguardando satélite...";
                     status.style.color = "orange";
                 }
             },
             (e) => {
-                alert("Erro: Ative o GPS em modo 'Alta Precisão' e permita o acesso.");
+                alert("Erro: Ative o GPS em 'Alta Precisão' e permita o acesso.");
                 btn.disabled = false;
                 btn.innerText = "TENTAR NOVAMENTE";
             },
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 25000 }
         );
     }
 
@@ -203,15 +203,18 @@
         const payload = { ...fotos, checklistItems: checks, placa: document.getElementById("placa").value, chassi: document.getElementById("chassi").value, modelo: document.getElementById("modeloVeiculo").value, km: document.getElementById("km").value, empresa: document.getElementById("empresa").value, cnpj: document.getElementById("cnpj").value, cliente: document.getElementById("cliente").value, telefone: document.getElementById("telefone").value, dataRecebimento: document.getElementById("dataRecebimento").value, dano: document.getElementById("dano").value, desc: document.getElementById("desc").value || "Sem obs", assinatura: pad.toDataURL(), localizacao: userLoc, timestamp: new Date().toLocaleString("pt-BR") };
 
         try {
-            await fetch("https://script.google.com/macros/s/AKfycbwdGyTpGrKqaJz0VxDODzcBQeL25XaAsTiDV0mn7MKCYT6-0QzBgqnAYDayD71cApH4/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            // URL DO SEU SCRIPT GOOGLE
+            const scriptURL = "https://script.google.com/macros/s/AKfycbwdGyTpGrKqaJz0VxDODzcBQeL25XaAsTiDV0mn7MKCYT6-0QzBgqnAYDayD71cApH4/exec";
+            await fetch(scriptURL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             document.getElementById("loading").style.display = "none";
             document.getElementById("step-form").style.display = "none";
             document.getElementById("success-screen").style.display = "block";
-            if(watchId) navigator.geolocation.clearWatch(watchId);
             iniciarTimer();
-        } catch (err) { alert("Erro no envio."); document.getElementById("loading").style.display = "none"; }
+        } catch (err) { 
+            alert("Erro no envio."); 
+            document.getElementById("loading").style.display = "none"; 
+        }
     };
 </script>
 </body>
 </html>
-
