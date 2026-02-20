@@ -47,8 +47,8 @@
 
     <div id="step-form">
         <form id="formFever">
-            <label>Placa do veículo *</label><input type="text" id="placa" required maxlength="8" placeholder="ABC1D23">
-            <label>Chassi (8 últimos digitos - caminão no vrido, no triciclo na coluna de direção) *</label><input type="text" id="chassi" maxlength="8" required placeholder="RA100256">
+            <label>Placa do veículo *</label><input type="text" id="placa" required maxlength="8" placeholder="ex: ABC1D23">
+            <label>Chassi (8 últimos digitos - caminão no vrido, no triciclo na coluna de direção) *</label><input type="text" id="chassi" maxlength="8" required placeholder="ex: RA100256">
             <label>Modelo do veículo *</label>
             <select id="modeloVeiculo" required>
                 <option value="" disabled selected>Selecione</option>
@@ -75,7 +75,7 @@
             <select id="dano" onchange="document.getElementById('campoObs').style.display=(this.value=='Sim'?'block':'none')">
                 <option value="Não">Não</option><option value="Sim">Sim</option>
             </select>
-            <div id="campoObs" style="display:none;"><textarea id="desc" rows="3"></textarea></div>
+            <div id="campoObs" style="display:none;"><textarea id="desc" rows="3" placeholder="Escreva o dano aqui!"></textarea></div>
 
             <h3>Fotos do veículo</h3><div id="gridFotos"></div>
 
