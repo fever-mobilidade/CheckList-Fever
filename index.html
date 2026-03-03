@@ -48,7 +48,7 @@
     <div id="step-form">
         <form id="formFever">
             <label>Placa do veículo *</label><input type="text" id="placa" required maxlength="8" placeholder="ex: ABC1D23">
-            <label>Chassi (8 últimos digitos - no caminhão está no vidro, no triciclo está na coluna de direção) *</label><input type="text" id="chassi" maxlength="8" required placeholder="ex: RA100256">
+            <label>Chassi (8 últimos digitos - caminão no vrido, no triciclo na coluna de direção) *</label><input type="text" id="chassi" maxlength="8" required placeholder="ex: RA100256">
             <label>Modelo do veículo *</label>
             <select id="modeloVeiculo" required>
                 <option value="" disabled selected>Selecione</option>
@@ -164,7 +164,7 @@
     function maskTel(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); v = v.replace(/(\d)(\d{4})$/, "$1-$2"); i.value = v; }
     function maskCNPJ(i) { let v = i.value.replace(/\D/g, ""); v = v.replace(/^(\d{2})(\d)/, "$1.$2"); v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); v = v.replace(/(\d{4})(\d)/, "$1-$2"); i.value = v; }
 
-    const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Documentação", "Chave do veiculo e baú", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Kit Reparo do Pneu", "Central Multimidia"];
+    const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Retrovisores", "Documentação", "Chave do veiculo e baú", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga portátil", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Kit Reparo do Pneu", "Central Multimidia"];
     itens.forEach(it => { document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; });
 
     const fLabels = ["Foto de Frente", "Foto Lateral Direita (motorista)", "Foto Traseira", "Foto Lateral Esquerda (passageiro)", "Foto da Placa", "Foto do Chassi", "Foto do Painel/KM"];
