@@ -47,7 +47,7 @@
 
     <div id="step-form">
         <form id="formFever">
-            <label>Placa do veículo *</label><input type="text" id="placa" required maxlength="8" placeholder="ex: ABC1D23" text-transform="uppercase">
+            <label>Placa do veículo *</label><input type="text" id="placa" required maxlength="8" placeholder="ex: ABC1D23" oninput="this.value = this.value.toUpperCase()" onfocus="this.value = ''; this.placeholder = '';" onblur="if(this.value === '') { this.placeholder = 'Ex:ABC1D23' };>
             <label>Chassi (8 últimos digitos - caminão no vrido, no triciclo na coluna de direção) *</label><input type="text" id="chassi" maxlength="8" required placeholder="ex: RA100256" text-transform="uppercase">
             <label>Modelo do veículo *</label>
             <select id="modeloVeiculo" required>
@@ -221,4 +221,5 @@
 </script>
 </body>
 </html>
+
 
