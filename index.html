@@ -57,7 +57,7 @@
     <div id="step-form">
         <form id="formFever">
             <div class="placa-container">
-                <label style="margin-top:0;">DIGITE A PLACA ou CHASSI DO VEÍCULO *</label>
+                <label style="margin-top:0;">DIGITE A PLACA - Se Zero digite o CHASSI (8 ultimos digitos) DO VEÍCULO *</label>
                <div class="busca-container">
                     <input type="text" id="placa" class="placa-input" required maxlength="8" placeholder="Ex:ABC1D23" oninput="this.value = this.value.toUpperCase()" onfocus="this.value = ''; this.placeholder = '';" onblur="if(this.value === '') { this.placeholder = 'Ex:ABC1D23' }; buscarNoBanco(this.value)">
                     <button type="button" class="btn-busca" onclick="buscarNoBanco(document.getElementById('placa').value)">BUSCAR</button>
@@ -241,4 +241,3 @@
 </script>
 </body>
 </html>
-
